@@ -40,6 +40,7 @@ z=broadcast(epsilon, rand(10))
 sigma_z=0.025
 z_l=1*(1+sigma_z)
 z_h=1*(1-sigma_z)
+levels_z=[z_l;z_h]
 #consumption given a and z is in last period just a + wage(and shock)
 C=[wvector[T].*ones(n,1)*(z_l) wvector[T].*ones(n,1)*(z_h)] 
 C=A.+C
@@ -52,11 +53,11 @@ z_levels=2
 I_choice=zeros(n,n,z_levels)
 for i=1:(T-1)
     #total income 
-    I=A.+[wvector[T-i]*ones(n,1)*(z_l) wvector[T-i]*ones(n,1)*(z_h)]
     for z_lev=1:z_levels
-        I_choice[:,:,z_lev]=Transpose(I[:,z_lev]*ones(1,n))
+        I=A[:,z_lev]+wvector[T-i]*ones(n,1)*levels_z[z_lev]
+        I_choice[:,:,z_lev]=Transpose(I[:]*ones(1,n))
     end
-    I=Transpose(I[]*ones(1,n))
+    I_choice[:,:,2]
     C=I-(A*ones(1,n))/(1+r)
     U=ones(n,n)*(-10000)
 
