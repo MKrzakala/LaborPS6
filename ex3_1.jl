@@ -68,9 +68,11 @@ for i=1:(T-1)
                 end
             end
         end
-
+        
     end
-
+###replicate further from here after lunch
+### to do is put all in the loop
+### so one gets V(a,z,T)
     to_max=(U+beta*V[:,T-i+1]*ones(1,n))
     Vmax, gmax =findmax(to_max, dims=1)
     some_index=zeros(n)
