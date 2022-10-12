@@ -24,14 +24,28 @@ function u(c)
 end
 
 #generate shocks
-z=randn(10).*0.05.+1
+epsilon_value=0.05
+mu_value=1
+function epsilon(rand)
+    if rand < 0.5
+        mu_value-epsilon_value
+    else
+        mu_value+epsilon_value
+    end
+end
 
+z=broadcast(epsilon, rand(10))
 
-#consumption given a is in last period just a + wage
-C=A.+wvector[T]
+sigma_z=0.025
+z_l=1*(1+sigma_z)
+z_h=1*(1-sigma_z)
+#consumption given a and z is in last period just a + wage(and shock)
+C=[wvector[T].*ones(n,1)*(z_l) wvector[T].*ones(n,1)*(z_h)] 
+C=A.+C
 #same goes for utility in last period, as well as value function
 U=broadcast(u,C)
 V[:,T]=U
+
 
 for i=1:(T-1)
     #total income 
