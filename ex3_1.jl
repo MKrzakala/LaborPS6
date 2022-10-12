@@ -10,11 +10,13 @@ const r = 1/beta-1
 global wvector=[0.5 0.5 0.75 0.75 1 1 0.75 0.75 0.25 0.25]
 const T = 10
 const n = 300
+global z_levels=2
 
-V=zeros(n,T,2)
-g=zeros(n,T-1,2)
+
+V=zeros(n,T,z_levels)
+g=zeros(n,T-1,z_levels)
 A = LinRange(0, 1, n)
-A=ones(n,2).*A
+A=ones(n,z_levels).*A
 
 function u(c)
     if sigma==1
@@ -35,7 +37,16 @@ function epsilon(rand)
     end
 end
 
+function epsilon_idx(rand)
+    if rand < 0.5
+        1
+    else
+        2
+    end
+end
+
 z=broadcast(epsilon, rand(10))
+z_idx=broadcast(epsilon_idx, rand(10))
 
 sigma_z=0.025
 z_l=1*(1+sigma_z)
@@ -49,10 +60,10 @@ U=broadcast(u,C)
 V[:,T,:]=U
 
 i=1
-z_levels=2
 I_choice=zeros(n,n,z_levels)
 C_choice=zeros(n,n,z_levels)
 U_choice=zeros(n,n,z_levels)
+to_max=zeros(n,n,z_levels)
 for i=1:(T-1)
     #total income 
     z_lev=1
@@ -68,33 +79,48 @@ for i=1:(T-1)
                 end
             end
         end
-        
+        to_max[:,:,z_lev]=(U_choice[:,:,z_lev]+beta*(0.5*V[:,T-i+1,1]*ones(1,n))+0.5*V[:,T-i+1,2]*ones(1,n))
+        Vmax, gmax =findmax(to_max[:,:,z_lev], dims=1)
+        some_index=zeros(n)
+        gmax_tup=Tuple.(gmax[1,:])
+        for idx=1:n
+            (g[idx,T-i,z_lev],some_index[idx])=gmax_tup[idx]
+            g[idx,T-i,z_lev]=floor(Int, g[idx,T-i,z_lev])
+        end
+        V[:,T-i,z_lev]=Transpose(Vmax)
     end
-###replicate further from here after lunch
-### to do is put all in the loop
-### so one gets V(a,z,T)
-    to_max=(U+beta*V[:,T-i+1]*ones(1,n))
-    Vmax, gmax =findmax(to_max, dims=1)
-    some_index=zeros(n)
-    gmax_tup=Tuple.(gmax[1,:])
-    for idx=1:n
-        (g[idx,T-i],some_index[idx])=gmax_tup[idx]
-        g[idx,T-i]=floor(Int, g[idx,T-i])
-    end
-    V[:,T-i]=Transpose(Vmax)
 end
 
-savingdec=zeros(T,1)
-assetlevel=zeros(T,1)
+V[:,10,1]
+savingdec=zeros(T,1,10)
+assetlevel=zeros(T,1,10)
 assetlevelindex=1  
-
-for i=1:(T-1)     
-    savingdec[i]=A[floor(Int, g[assetlevelindex,i])]
-    assetlevelindex=floor(Int, g[assetlevelindex,i])
-    assetlevel[i+1]=A[assetlevelindex]
+z_paths=zeros(10,T)
+c_paths=zeros(10,T)
+for n=1:10
+    z_paths[n,:]=broadcast(epsilon_idx, rand(10))
+end
+for n=1:10
+    for i=1:(T-1)     
+        savingdec[i,1,n]=A[floor(Int, g[assetlevelindex,i,floor(Int,z_paths[n,i])]),1]
+        c_paths[n,i]=A[assetlevelindex,1]+wvector[i]*levels_z[floor(Int,z_paths[n,i])]-savingdec[i,1,n]
+        assetlevelindex=floor(Int, g[assetlevelindex,i,floor(Int,z_paths[n,i])])
+        assetlevel[i+1,1,n]=A[assetlevelindex]
+    end
+    c_paths[n,10]=A[assetlevelindex,1]+wvector[10]*levels_z[floor(Int,z_paths[n,10])]
 end
 
-results=DataFrame(Age=1:T, Asset=assetlevel[:], Asset_plus_wage=(assetlevel.+Transpose(wvector))[:], Savings=savingdec[:], Consumption=(assetlevel+Transpose(wvector)-savingdec)[:])
-results.Consumption
-plot(1:T,wvector[:], label="Income", title="wages and the optimal consumption decision", xaxis="age")
-plot!(1:T,results.Consumption, label="Consumption")
+plot(1:10,c_paths[1,:])
+plot!(1:10,c_paths[2,:])
+plot!(1:10,c_paths[3,:])
+plot!(1:10,c_paths[4,:])
+plot!(1:10,c_paths[5,:])
+plot!(1:10,c_paths[6,:])
+plot!(1:10,c_paths[7,:])
+plot!(1:10,c_paths[8,:])
+plot!(1:10,c_paths[9,:])
+plot!(1:10,c_paths[10,:])
+
+
+
+
