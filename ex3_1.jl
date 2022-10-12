@@ -93,14 +93,15 @@ end
 
 V[:,10,1]
 savingdec=zeros(T,1,10)
-assetlevel=zeros(T,1,10)
-assetlevelindex=1  
+assetlevel=zeros(T,1,10) 
 z_paths=zeros(10,T)
+z_paths_real=deepcopy(z_paths)
 c_paths=zeros(10,T)
 for n=1:10
     z_paths[n,:]=broadcast(epsilon_idx, rand(10))
 end
 for n=1:10
+    assetlevelindex=1 
     for i=1:(T-1)     
         savingdec[i,1,n]=A[floor(Int, g[assetlevelindex,i,floor(Int,z_paths[n,i])]),1]
         c_paths[n,i]=A[assetlevelindex,1]+wvector[i]*levels_z[floor(Int,z_paths[n,i])]-savingdec[i,1,n]
@@ -109,8 +110,14 @@ for n=1:10
     end
     c_paths[n,10]=A[assetlevelindex,1]+wvector[10]*levels_z[floor(Int,z_paths[n,10])]
 end
-
-plot(1:10,c_paths[1,:])
+for i=1:10
+    for n=1:10
+        z_paths_real[n,i]=levels_z[floor(Int,z_paths[n,i])]
+    end
+end
+results_det=DataFrame(CSV.File("Results_deterministic.csv"))
+plot(1:10,results_det.Consumption[:],lw=3,label="deterministic", legend=:bottomright)
+plot!(1:10,c_paths[1,:])
 plot!(1:10,c_paths[2,:])
 plot!(1:10,c_paths[3,:])
 plot!(1:10,c_paths[4,:])
@@ -120,7 +127,33 @@ plot!(1:10,c_paths[7,:])
 plot!(1:10,c_paths[8,:])
 plot!(1:10,c_paths[9,:])
 plot!(1:10,c_paths[10,:])
+savefig("c_paths.png")
 
+plot(1:10,ones(10), lw=3,label="deterministic", legend=:bottomright)
+plot!(1:10,z_paths_real[1,:])
+plot!(1:10,z_paths_real[2,:])
+plot!(1:10,z_paths_real[3,:])
+plot!(1:10,z_paths_real[4,:])
+plot!(1:10,z_paths_real[5,:])
+plot!(1:10,z_paths_real[6,:])
+plot!(1:10,z_paths_real[7,:])
+plot!(1:10,z_paths_real[8,:])
+plot!(1:10,z_paths_real[9,:])
+plot!(1:10,z_paths_real[10,:])
+savefig("z_paths.png")
+
+plot(1:10,results_det.Asset[:],lw=3,label="deterministic", legend=:bottomright)
+plot!(1:10,assetlevel[1:T,1,1])
+plot!(1:10,assetlevel[1:T,1,2])
+plot!(1:10,assetlevel[1:T,1,3])
+plot!(1:10,assetlevel[1:T,1,4])
+plot!(1:10,assetlevel[1:T,1,5])
+plot!(1:10,assetlevel[1:T,1,6])
+plot!(1:10,assetlevel[1:T,1,7])
+plot!(1:10,assetlevel[1:T,1,8])
+plot!(1:10,assetlevel[1:T,1,9])
+plot!(1:10,assetlevel[1:T,1,10])
+savefig("assetlevel.png")
 
 
 

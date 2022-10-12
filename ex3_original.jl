@@ -66,6 +66,7 @@ for i=1:(T-1)
 end
 
 results=DataFrame(Age=1:T, Asset=assetlevel[:], Asset_plus_wage=(assetlevel.+Transpose(wvector))[:], Savings=savingdec[:], Consumption=(assetlevel+Transpose(wvector)-savingdec)[:])
+CSV.write("Results_deterministic.csv",results)
 results.Consumption
 plot(1:T,wvector[:], label="Income", title="wages and the optimal consumption decision", xaxis="age")
 plot!(1:T,results.Consumption, label="Consumption")
