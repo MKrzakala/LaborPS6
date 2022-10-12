@@ -49,7 +49,7 @@ for i=1:(T-1)
     some_index=zeros(n)
     gmax_tup=Tuple.(gmax[1,:])
     for idx=1:n
-        (some_index[idx], g[idx,T-i])=gmax_tup[idx]
+        (g[idx,T-i],some_index[idx])=gmax_tup[idx]
         g[idx,T-i]=floor(Int, g[idx,T-i])
     end
     V[:,T-i]=Transpose(Vmax)
