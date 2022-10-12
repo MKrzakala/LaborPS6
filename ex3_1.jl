@@ -14,6 +14,7 @@ const n = 300
 V=zeros(n,T,2)
 g=zeros(n,T-1,2)
 A = LinRange(0, 1, n)
+A=ones(n,2).*A
 
 function u(c)
     if sigma==1
@@ -44,13 +45,18 @@ C=[wvector[T].*ones(n,1)*(z_l) wvector[T].*ones(n,1)*(z_h)]
 C=A.+C
 #same goes for utility in last period, as well as value function
 U=broadcast(u,C)
-V[:,T]=U
+V[:,T,:]=U
 
-
+i=1
+z_levels=2
+I_choice=zeros(n,n,z_levels)
 for i=1:(T-1)
     #total income 
-    I=A.+wvector[T-i]
-    I=Transpose(I*ones(1,n))
+    I=A.+[wvector[T-i]*ones(n,1)*(z_l) wvector[T-i]*ones(n,1)*(z_h)]
+    for z_lev=1:z_levels
+        I_choice[:,:,z_lev]=Transpose(I[:,z_lev]*ones(1,n))
+    end
+    I=Transpose(I[]*ones(1,n))
     C=I-(A*ones(1,n))/(1+r)
     U=ones(n,n)*(-10000)
 
