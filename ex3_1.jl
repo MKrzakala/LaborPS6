@@ -11,8 +11,8 @@ global wvector=[0.5 0.5 0.75 0.75 1 1 0.75 0.75 0.25 0.25]
 const T = 10
 const n = 300
 
-V=zeros(n,T)
-g=zeros(n,T-1)
+V=zeros(n,T,2)
+g=zeros(n,T-1,2)
 A = LinRange(0, 1, n)
 
 function u(c)
