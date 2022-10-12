@@ -51,23 +51,26 @@ V[:,T,:]=U
 i=1
 z_levels=2
 I_choice=zeros(n,n,z_levels)
+C_choice=zeros(n,n,z_levels)
+U_choice=zeros(n,n,z_levels)
 for i=1:(T-1)
     #total income 
+    z_lev=1
     for z_lev=1:z_levels
         I=A[:,z_lev]+wvector[T-i]*ones(n,1)*levels_z[z_lev]
         I_choice[:,:,z_lev]=Transpose(I[:]*ones(1,n))
-    end
-    I_choice[:,:,2]
-    C=I-(A*ones(1,n))/(1+r)
-    U=ones(n,n)*(-10000)
-
-    for j=1:n
-        for k=1:n
-            if C[j,k]>0
-                U[j,k]=u(C[j,k])
+        C_choice[:,:,z_lev]=I_choice[:,:,z_lev]-(A[:,z_lev]*ones(1,n))/(1+r)
+        U_choice[:,:,z_lev]=ones(n,n)*(-10000)
+        for j=1:n
+            for k=1:n
+                if C_choice[j,k,z_lev]>0
+                    U_choice[j,k,z_lev]=u(C_choice[j,k,z_lev])
+                end
             end
         end
+
     end
+
     to_max=(U+beta*V[:,T-i+1]*ones(1,n))
     Vmax, gmax =findmax(to_max, dims=1)
     some_index=zeros(n)
