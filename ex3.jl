@@ -44,13 +44,28 @@ for i=1:(T-1)
             end
         end
     end
-    to_max=(U+beta*V[:,T-1+1]*ones(1,n))
+    to_max=(U+beta*V[:,T-i+1]*ones(1,n))
     Vmax, gmax =findmax(to_max, dims=1)
     some_index=zeros(n)
     gmax_tup=Tuple.(gmax[1,:])
     for idx=1:n
-        (some_index[idx], g[idx,T-1])=gmax_tup[idx]
+        (some_index[idx], g[idx,T-i])=gmax_tup[idx]
+        g[idx,T-i]=floor(Int, g[idx,T-i])
     end
-    V[:,T-1]=Transpose(Vmax)
+    V[:,T-i]=Transpose(Vmax)
 end
 
+savingdec=zeros(T,1)
+assetlevel=zeros(T,1)
+assetlevelindex=1  
+
+for i=1:(T-1)     
+    savingdec[i]=A[floor(Int, g[assetlevelindex,i])]
+    assetlevelindex=floor(Int, g[assetlevelindex,i])
+    assetlevel[i+1]=A[assetlevelindex]
+end
+
+results=DataFrame(Age=1:T, Asset=assetlevel[:], Asset_plus_wage=(assetlevel.+Transpose(wvector))[:], Savings=savingdec[:], Consumption=(assetlevel+Transpose(wvector)-savingdec)[:])
+results.Consumption
+plot(1:T,wvector[:], label="Income", title="wages and the optimal consumption decision", xaxis="age")
+plot!(1:T,results.Consumption, label="Consumption")
