@@ -2,6 +2,7 @@ using Plots
 using Statistics
 using DataFrames
 using CSV
+using LinearAlgebra
 
 const sigma = 2
 const beta = 0.9
@@ -29,10 +30,27 @@ C=A.+wvector[T]
 U=broadcast(u,C)
 V[:,T]=U
 
-#Finished worked here
-#what to do is to replicate the loop for deterministic case
-#save the policy functions and consumption path
-#apply for stochastic environment
-
 for i=1:(T-1)
-    I=
+    #total income 
+    I=A.+wvector[T-i]
+    I=Transpose(I*ones(1,n))
+    C=I-(A*ones(1,n))/(1+r)
+    U=ones(n,n)*(-10000)
+
+    for j=1:n
+        for k=1:n
+            if C[j,k]>0
+                U[j,k]=u(C[j,k])
+            end
+        end
+    end
+    to_max=(U+beta*V[:,T-1+1]*ones(1,n))
+    Vmax, gmax =findmax(to_max, dims=1)
+    some_index=zeros(n)
+    gmax_tup=Tuple.(gmax[1,:])
+    for idx=1:n
+        (some_index[idx], g[idx,T-1])=gmax_tup[idx]
+    end
+    V[:,T-1]=Transpose(Vmax)
+end
+
